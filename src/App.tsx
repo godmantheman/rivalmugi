@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, Plus, ArrowRight, RotateCcw, Search, FlaskConical, Zap, Gavel } from 'lucide-react';
+import { Settings, Plus, ArrowRight, RotateCcw, Search, FlaskConical, Zap } from 'lucide-react';
 import { WEAPONS, combineWeapons } from './data/weapons';
 import { Weapon, WeaponCategory } from './types';
 
@@ -31,6 +31,7 @@ const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' |
         alt={weapon.name}
         className="w-full h-full object-contain mb-1 drop-shadow-lg"
         onError={(e) => {
+          // Fallback to placeholder if image fails to load
           (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${weapon.id}/200/200`;
         }}
         referrerPolicy="no-referrer"
@@ -40,7 +41,7 @@ const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' |
   );
 };
 
-export default function App() {
+function LabApp() {
   const [slot1, setSlot1] = useState<Weapon | null>(null);
   const [slot2, setSlot2] = useState<Weapon | null>(null);
   const [result, setResult] = useState<Weapon | null>(null);
@@ -48,6 +49,10 @@ export default function App() {
   const [filter, setFilter] = useState<WeaponCategory | 'All'>('All');
   const [search, setSearch] = useState('');
   const [history, setHistory] = useState<{ id: string; w1: Weapon; w2: Weapon; result: Weapon }[]>([]);
+
+  useEffect(() => {
+    console.log("App mounted successfully");
+  }, []);
 
   const filteredWeapons = useMemo(() => {
     return WEAPONS.filter((w) => {
@@ -63,17 +68,16 @@ export default function App() {
     setResult(null);
 
     setTimeout(() => {
-      const combined = combineWeapons(slot1, slot2);
-      setResult(combined);
-      setHistory(prev => [{ id: Math.random().toString(36).substr(2, 9), w1: slot1, w2: slot2, result: combined }, ...prev].slice(0, 5));
-      setIsCombining(false);
+      try {
+        const combined = combineWeapons(slot1, slot2);
+        setResult(combined);
+        setHistory(prev => [{ id: Math.random().toString(36).substr(2, 9), w1: slot1, w2: slot2, result: combined }, ...prev].slice(0, 5));
+      } catch (err) {
+        console.error("Combination Error:", err);
+      } finally {
+        setIsCombining(false);
+      }
     }, 1500);
-  };
-
-  const handleReset = () => {
-    setSlot1(null);
-    setSlot2(null);
-    setResult(null);
   };
 
   return (
@@ -360,4 +364,8 @@ export default function App() {
       `}} />
     </div>
   );
+}
+
+export default function App() {
+  return <LabApp />;
 }
