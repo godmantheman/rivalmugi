@@ -11,6 +11,18 @@ const TIER_COLORS = {
   Legendary: 'text-orange-400 border-orange-400/30 bg-orange-400/5',
 };
 
+// Resolve image path correctly for GitHub Pages
+const getImagePath = (img: string) => {
+  if (!img) return '';
+  if (img.startsWith('http')) return img;
+  // Remove leading slash if present to ensure relative path
+  const cleanImg = img.startsWith('/') ? img.slice(1) : img;
+  // Use import.meta.env.BASE_URL which is './' or the repo path
+  const base = import.meta.env.BASE_URL || './';
+  const separator = base.endsWith('/') ? '' : '/';
+  return `${base}${separator}${cleanImg}`;
+};
+
 const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' | 'md' | 'lg' }> = ({ weapon, onClick, size = 'md' }) => {
   const sizeClasses = {
     sm: 'w-16 h-16 text-[10px]',
@@ -27,7 +39,7 @@ const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' |
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <img
-        src={weapon.image}
+        src={getImagePath(weapon.image)}
         alt={weapon.name}
         className="w-full h-full object-contain mb-1 drop-shadow-lg"
         onError={(e) => {
@@ -326,7 +338,7 @@ function LabApp() {
                 </div>
                 <ArrowRight className="w-4 h-4 text-white/20" />
                 <div className={`flex items-center gap-2 ${TIER_COLORS[item.result.tier]}`}>
-                  <img src={item.result.image} className="w-8 h-8 object-contain" alt="" />
+                  <img src={getImagePath(item.result.image)} className="w-8 h-8 object-contain" alt="" />
                   <span className="font-black text-sm">{item.result.name}</span>
                 </div>
               </motion.div>
