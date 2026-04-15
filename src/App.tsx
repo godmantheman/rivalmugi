@@ -11,8 +11,8 @@ const TIER_COLORS = {
   Legendary: 'text-orange-400 border-orange-400/30 bg-orange-400/5',
 };
 
-// Base URL for weapon images (using a direct link as requested)
-const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/0319sea2/Rivals-Weapon-Lab/main/public/';
+// Base URL for weapon images (using jsDelivr CDN for better reliability and bypassing GitHub raw limits)
+const IMAGE_BASE_URL = 'https://cdn.jsdelivr.net/gh/godmantheman/rivalmugi@main/public/';
 
 // Resolve image path correctly
 const getImagePath = (img: string) => {
@@ -21,7 +21,7 @@ const getImagePath = (img: string) => {
   
   const cleanImg = img.startsWith('/') ? img.slice(1) : img;
   
-  // Use the direct GitHub raw link as the primary source
+  // Use jsDelivr as the primary source with a cache buster
   return `${IMAGE_BASE_URL}${cleanImg}`;
 };
 
@@ -82,9 +82,12 @@ const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' |
       <img
         src={imgSrc}
         alt={weapon.name}
+        width="100%"
+        height="100%"
         className="w-full h-full object-contain mb-1 drop-shadow-lg"
         onError={handleImageError}
         referrerPolicy="no-referrer"
+        loading="eager"
       />
       <span className="font-mono font-medium text-center truncate w-full">{weapon.name}</span>
     </motion.div>
@@ -120,10 +123,13 @@ const WeaponIcon: React.FC<{ weapon: Weapon; size?: number }> = ({ weapon, size 
     <img 
       src={imgSrc} 
       className="object-contain" 
+      width={size}
+      height={size}
       style={{ width: size, height: size }} 
       alt="" 
       onError={handleImageError}
       referrerPolicy="no-referrer"
+      loading="eager"
     />
   );
 };
