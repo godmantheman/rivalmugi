@@ -11,21 +11,18 @@ const TIER_COLORS = {
   Legendary: 'text-orange-400 border-orange-400/30 bg-orange-400/5',
 };
 
-// Resolve image path correctly for GitHub Pages with bypass logic
+// Base URL for weapon images (using a direct link as requested)
+const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/0319sea2/Rivals-Weapon-Lab/main/public/';
+
+// Resolve image path correctly
 const getImagePath = (img: string) => {
   if (!img) return '';
   if (img.startsWith('http')) return img;
   
   const cleanImg = img.startsWith('/') ? img.slice(1) : img;
   
-  // Method 1: Use BASE_URL (Vite default)
-  const base = (import.meta as any).env?.BASE_URL || './';
-  const path = base.endsWith('/') ? `${base}${cleanImg}` : `${base}/${cleanImg}`;
-  
-  // Method 2: Absolute path from current origin (Bypass for relative path issues)
-  const absolutePath = `${window.location.origin}${window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/'}${cleanImg}`;
-  
-  return path;
+  // Use the direct GitHub raw link as the primary source
+  return `${IMAGE_BASE_URL}${cleanImg}`;
 };
 
 const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' | 'md' | 'lg' }> = ({ weapon, onClick, size = 'md' }) => {
