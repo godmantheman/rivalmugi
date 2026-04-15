@@ -11,16 +11,21 @@ const TIER_COLORS = {
   Legendary: 'text-orange-400 border-orange-400/30 bg-orange-400/5',
 };
 
-// Resolve image path correctly for GitHub Pages
+// Resolve image path correctly for GitHub Pages with bypass logic
 const getImagePath = (img: string) => {
   if (!img) return '';
   if (img.startsWith('http')) return img;
-  // Remove leading slash if present to ensure relative path
+  
   const cleanImg = img.startsWith('/') ? img.slice(1) : img;
-  // Use import.meta.env.BASE_URL which is './' or the repo path
+  
+  // Method 1: Use BASE_URL (Vite default)
   const base = (import.meta as any).env?.BASE_URL || './';
-  const separator = base.endsWith('/') ? '' : '/';
-  return `${base}${separator}${cleanImg}`;
+  const path = base.endsWith('/') ? `${base}${cleanImg}` : `${base}/${cleanImg}`;
+  
+  // Method 2: Absolute path from current origin (Bypass for relative path issues)
+  const absolutePath = `${window.location.origin}${window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/'}${cleanImg}`;
+  
+  return path;
 };
 
 const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' | 'md' | 'lg' }> = ({ weapon, onClick, size = 'md' }) => {
@@ -55,6 +60,14 @@ const WeaponCard: React.FC<{ weapon: Weapon; onClick?: () => void; size?: 'sm' |
       // Try lowercase
       setImgSrc(getImagePath(`${baseName.toLowerCase()}${ext}`));
       setRetryCount(3);
+    } else if (retryCount === 3) {
+      // BYPASS METHOD: Use Image Proxy (weserv.nl)
+      // This helps bypass GitHub Pages referrer/caching issues
+      const currentUrl = window.location.href;
+      const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+      const fullImageUrl = `${baseUrl}${weapon.image}`;
+      setImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(fullImageUrl)}&default=https://picsum.photos/seed/${weapon.id}/200/200`);
+      setRetryCount(4);
     } else {
       // Fallback to placeholder
       setImgSrc(`https://picsum.photos/seed/${weapon.id}/200/200`);
@@ -96,6 +109,13 @@ const WeaponIcon: React.FC<{ weapon: Weapon; size?: number }> = ({ weapon, size 
     if (retryCount === 0) { setImgSrc(getImagePath(`${baseName}_29${ext}`)); setRetryCount(1); }
     else if (retryCount === 1) { setImgSrc(getImagePath(`${baseName}icon${ext}`)); setRetryCount(2); }
     else if (retryCount === 2) { setImgSrc(getImagePath(`${baseName.toLowerCase()}${ext}`)); setRetryCount(3); }
+    else if (retryCount === 3) {
+      const currentUrl = window.location.href;
+      const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+      const fullImageUrl = `${baseUrl}${weapon.image}`;
+      setImgSrc(`https://images.weserv.nl/?url=${encodeURIComponent(fullImageUrl)}&default=https://picsum.photos/seed/${weapon.id}/200/200`);
+      setRetryCount(4);
+    }
     else { setImgSrc(`https://picsum.photos/seed/${weapon.id}/200/200`); }
   };
 
